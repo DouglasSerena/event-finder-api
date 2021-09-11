@@ -1,28 +1,76 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Res,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { handleTry } from 'src/utils/handle-try';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategotyDto } from './dto/update-category.dto';
-import { Category, CategoryDocument } from './schemas/category.schema';
+import { ICategory } from './interface/category.interface';
+import { CategoryService } from './services/category.service';
 
 @Controller('api/category')
 export class CategoryController {
-  constructor(
-    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
-  ) {}
+  constructor(private categoryService: CategoryService) {}
 
-  @Get() public getAll() {
-    return this.categoryModel.find().exec();
+  @Get() public async getAll() {
+    const [data, error] = await handleTry(this.categoryService.getAll());
+    if (data) {
+      return data;
+    } else {
+      return new BadRequestException(error);
+    }
   }
 
-  @Post() public async create(@Body() createCategoryDto: CreateCategoryDto) {
-    await this.categoryModel.create(createCategoryDto);
+  @Get(':id') public async getById(@Param('id') id: number) {
+    const [data, error] = await handleTry(this.categoryService.getById(id));
+    if (data) {
+      return data;
+    } else {
+      return new BadRequestException(error);
+    }
   }
-  
+
+  @Post() public async create(@Body() createEventDto: CreateCategoryDto) {
+    const [_, error] = await handleTry(
+      this.categoryService.create(createEventDto as ICategory),
+    );
+    if (error) {
+      return new BadRequestException(error);
+    }
+  }
+
   @Put(':id') public async update(
-    @Param('id') _id: number,
-    @Body() updateCategoryDto: UpdateCategotyDto,
+    @Res() response: Response,
+    @Param('id') id: number,
+    @Body() updateEventDto: CreateCategoryDto,
   ) {
-    await this.categoryModel.updateOne({ _id }, updateCategoryDto);
+    const [data, error] = await handleTry(
+      this.categoryService.update(id, updateEventDto as ICategory),
+    );
+    if (data) {
+      return response.status(204).send();
+    } else {
+      return response.status(400).send(new BadRequestException(error));
+    }
+  }
+
+  @Delete(':id') public async delete(
+    @Res() response: Response,
+    @Param('id') id: number,
+  ) {
+    const [data, error] = await handleTry(this.categoryService.delete(id));
+
+    if (data) {
+      return response.status(204).send();
+    } else {
+      return response.status(400).send(new BadRequestException(error));
+    }
   }
 }

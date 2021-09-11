@@ -6,8 +6,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 @Global()
 @Module({
   imports: [
-    CategoryModule,
     EventModule,
+    CategoryModule,
     MongooseModule.forRoot(
       'mongodb+srv://DouglasSerena:pBqUGr81PTKnDFwi@cluster0.exvek.mongodb.net/events-finder?retryWrites=true&w=majority',
     ),
@@ -15,4 +15,4 @@ import { MongooseModule } from '@nestjs/mongoose';
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
