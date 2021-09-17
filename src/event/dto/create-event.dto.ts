@@ -18,6 +18,12 @@ export class CreateEventDto {
   @IsString()
   description: string;
 
+  @IsString()
+  date: string;
+
+  @IsString()
+  address: string;
+
   @IsArray()
   @Validate(validateIsArrayString)
   helperTags: string[];

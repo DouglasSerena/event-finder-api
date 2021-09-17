@@ -20,7 +20,7 @@ export class CategoryService {
     return await this.categoryModel.find().exec();
   }
 
-  public async getById(_id: number) {
+  public async getById(_id: string) {
     const [data, error] = await handleTry(
       this.categoryModel.findById({ _id }).exec(),
     );
@@ -37,7 +37,7 @@ export class CategoryService {
     return await this.categoryModel.create({ ...category, tags });
   }
 
-  public async update(_id: number, category: ICategory) {
+  public async update(_id: string, category: ICategory) {
     await this.getById(_id);
 
     const tags = this.filterTags(category);
@@ -45,7 +45,7 @@ export class CategoryService {
     return await this.categoryModel.updateOne({ _id }, { ...category, tags });
   }
 
-  public async delete(_id: number) {
+  public async delete(_id: string) {
     await this.getById(_id);
 
     return await this.categoryModel.deleteOne({ _id });

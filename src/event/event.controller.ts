@@ -24,7 +24,7 @@ export class EventController {
   @Get() public async getAll() {
     const [data, error] = await handleTry(this.eventService.getAll());
     if (data) {
-      return data;
+      return { data: data };
     } else {
       return new BadRequestException(error);
     }
@@ -33,33 +33,38 @@ export class EventController {
   @Get('search') public async search(@Query() search: SearchDto) {
     const [data, error] = await handleTry(this.eventService.search(search));
     if (data) {
-      return data;
+      return { data: data };
     } else {
       return new BadRequestException(error);
     }
   }
 
-  @Get(':id') public async getById(@Param('id') id: number) {
+  @Get(':id') public async getById(@Param('id') id: string) {
     const [data, error] = await handleTry(this.eventService.getById(id));
     if (data) {
-      return data;
+      return { data: data };
     } else {
       return new BadRequestException(error);
     }
   }
 
-  @Post() public async create(@Body() createEventDto: CreateEventDto) {
+  @Post() public async create(
+    @Res() response: Response,
+    @Body() createEventDto: CreateEventDto,
+  ) {
     const [_, error] = await handleTry(
       this.eventService.create(createEventDto as IEvent),
     );
-    if (error) {
-      return new BadRequestException(error);
+    if (!error) {
+      return response.status(201).send();
+    } else {
+      return response.status(400).json(new BadRequestException(error));
     }
   }
 
   @Put(':id') public async update(
     @Res() response: Response,
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() updateEventDto: CreateEventDto,
   ) {
     const [data, error] = await handleTry(
@@ -74,7 +79,7 @@ export class EventController {
 
   @Delete(':id') public async delete(
     @Res() response: Response,
-    @Param('id') id: number,
+    @Param('id') id: string,
   ) {
     const [data, error] = await handleTry(this.eventService.delete(id));
     if (data) {

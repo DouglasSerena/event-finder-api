@@ -17,6 +17,9 @@ export class Event {
   description: string;
 
   @Prop({ required: true })
+  date: string;
+
+  @Prop({ required: true })
   tags: string[];
 
   @Prop()
@@ -33,6 +36,9 @@ export class Event {
 
   @Prop()
   categoriesId: string[];
+
+  @Prop()
+  address: string;
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);
