@@ -2,7 +2,7 @@
 https://docs.nestjs.com/providers#services
 */
 
-import { Injectable } from '@nestjs/common';
+import { HttpService, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CategoryService } from 'src/category/services/category.service';
@@ -17,6 +17,7 @@ export class EventService {
   constructor(
     @InjectModel(Event.name) private eventModel: Model<EventDocument>,
     private categoryService: CategoryService,
+    private httpService: HttpService,
   ) {}
 
   public async getAll() {
@@ -35,17 +36,26 @@ export class EventService {
   }
 
   public async create(event: IEvent) {
+    const category = await this.categoryService.getById(event.categoriesId[0]);
     const tags = await this.filterTags(event);
 
-    return await this.eventModel.create({ ...event, tags });
+    return await this.eventModel.create({
+      ...event,
+      tags,
+      icon: category.icon,
+    });
   }
 
   public async update(_id: string, event: IEvent) {
     await this.getById(_id);
 
+    const category = await this.categoryService.getById(event.categoriesId[0]);
     const tags = await this.filterTags(event);
 
-    return await this.eventModel.updateOne({ _id }, { ...event, tags });
+    return await this.eventModel.updateOne(
+      { _id },
+      { ...event, tags, icon: category.icon },
+    );
   }
 
   public async delete(_id: string) {
@@ -55,17 +65,54 @@ export class EventService {
   }
 
   public async search(search: SearchDto) {
-    const tags = simplify(search.query || search.q);
-    return this.eventModel.find(
+    const query = search.query || search.q;
+    const tags = simplify(query);
+    const events = await this.eventModel.find(
       {
         $or: [
           { tags: { $all: tags } },
-          { name: new RegExp(`.*${search.query}.*`, 'g') },
+          { name: new RegExp(`.*${query}.*`, 'gi') },
         ],
       },
       null,
-      { limit: search?.limit || 10 },
+      { limit: search?.limit || 5 },
     );
+    const [data] = await handleTry(
+      this.searchLocation(query, {
+        limit: search.limit || 5,
+      }),
+    );
+    return [...events, ...data];
+  }
+
+  public async searchLocation(
+    value: string,
+    options?: { limit?: number; language?: string },
+  ) {
+    const [data] = await handleTry(
+      this.httpService
+        .get(
+          `https://api.mapbox.com/geocoding/v5/mapbox.places/${value}.json`,
+          {
+            params: {
+              access_token:
+                'pk.eyJ1IjoiZG91Z2xhc3NlcmVuYSIsImEiOiJja2VrMmR6bXMxc3czMnltejIzbXh5eHIwIn0.uUxqAx39JExJ__-KxxhEyQ',
+              limit: options?.limit || 5,
+              language: options?.language || 'pt-BR',
+            },
+          },
+        )
+        .toPromise(),
+    );
+
+    return data.data.features.map((location) => {
+      return {
+        icon: 'place',
+        name: location.place_name,
+        latitude: location.center[0],
+        longitude: location.center[1],
+      };
+    });
   }
 
   private async filterTags(event: IEvent) {
