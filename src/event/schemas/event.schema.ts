@@ -39,6 +39,9 @@ export class Event {
 
   @Prop()
   address: string;
+
+  @Prop()
+  icon: string;
 }
 
 export const EventSchema = SchemaFactory.createForClass(Event);

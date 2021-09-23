@@ -5,6 +5,7 @@ export interface IEvent {
   address?: string;
   description: string;
   tags: string[];
+  icon: string;
   helperTags: string[];
   images: string[];
   latitude: number;
