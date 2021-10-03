@@ -42,13 +42,13 @@ export class CategoryService {
 
     const tags = this.filterTags(category);
 
-    return await this.categoryModel.updateOne({ _id }, { ...category, tags });
+    return await this.categoryModel.updateOne({ id: _id }, { ...category, tags });
   }
 
   public async delete(_id: string) {
     await this.getById(_id);
 
-    return await this.categoryModel.deleteOne({ _id });
+    return await this.categoryModel.deleteOne({ id: _id });
   }
 
   private filterTags(category: ICategory) {

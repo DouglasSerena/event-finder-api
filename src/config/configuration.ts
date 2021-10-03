@@ -1,0 +1,12 @@
+export default () => ({
+  PROT: parseInt(process.env.PORT, 10) || 3000,
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRES: process.env.JWT_EXPIRES,
+  OAUTH2_REDIRECT: process.env.OAUTH2_REDIRECT,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_SECRET: process.env.GOOGLE_SECRET,
+  GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+  FACEBOOK_CLIENT_ID: process.env.FACEBOOK_CLIENT_ID,
+  FACEBOOK_SECRET: process.env.FACEBOOK_SECRET,
+  FACEBOOK_CALLBACK_URL: process.env.FACEBOOK_CALLBACK_URL,
+});
