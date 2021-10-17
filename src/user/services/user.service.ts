@@ -44,6 +44,6 @@ export class UserService {
 
   public async update(user: Partial<IUser> & { _id: string }) {
     await this.getByIdOrProviderId(user.providerId);
-    return await this.userModel.updateOne({ _id: user.id }, user);
+    return await this.userModel.updateOne({ _id: user._id }, user);
   }
 }

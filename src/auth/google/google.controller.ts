@@ -34,7 +34,7 @@ export class GoogleController {
     }
 
     const { accessToken } = this.authService.login({
-      id: userRegistered.id,
+      _id: userRegistered._id,
       avatar: userRegistered.avatar,
       email: userRegistered.email,
       username: userRegistered.username,

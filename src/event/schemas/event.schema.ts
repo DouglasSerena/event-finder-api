@@ -10,6 +10,9 @@ export class Event {
   id: string;
 
   @Prop({ required: true })
+  userId: string;
+
+  @Prop({ required: true })
   name: string;
 
   @Prop()
@@ -37,7 +40,13 @@ export class Event {
   categoriesId: string[];
 
   @Prop()
-  address: string;
+  value: number;
+
+  @Prop()
+  whatsapp: string;
+
+  @Prop()
+  email: string;
 
   @Prop()
   icon: string;

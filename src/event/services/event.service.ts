@@ -24,6 +24,10 @@ export class EventService {
     return await this.eventModel.find().exec();
   }
 
+  public async getByIdUser(userId: string) {
+    return await this.eventModel.find({ userId }).exec();
+  }
+
   public async getById(_id: string) {
     const [data, error] = await handleTry(
       this.eventModel.findById({ _id }).exec(),
@@ -58,10 +62,10 @@ export class EventService {
     );
   }
 
-  public async delete(_id: string) {
+  public async delete(_id: string, userId: string) {
     await this.getById(_id);
 
-    return await this.eventModel.deleteOne({ _id });
+    return await this.eventModel.deleteOne({ _id, userId });
   }
 
   public async search(search: SearchDto) {

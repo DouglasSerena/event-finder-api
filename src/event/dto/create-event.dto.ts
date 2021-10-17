@@ -3,6 +3,7 @@ import {
   IsLatitude,
   IsLongitude,
   IsNotEmpty,
+  IsNumber,
   IsString,
   Validate,
 } from 'class-validator';
@@ -18,11 +19,21 @@ export class CreateEventDto {
   @IsString()
   description: string;
 
+  @IsNotEmpty()
   @IsString()
-  date: string;
+  userId: string;
 
   @IsString()
-  address: string;
+  whatsapp: string;
+
+  @IsString()
+  email: string;
+
+  @IsNumber()
+  value: number;
+
+  @IsString()
+  date: string;
 
   @IsArray()
   @Validate(validateIsArrayString)

@@ -1,6 +1,7 @@
 export default () => ({
   PROT: parseInt(process.env.PORT, 10) || 3000,
   JWT_SECRET: process.env.JWT_SECRET,
+  APP_URL: process.env.APP_URL,
   JWT_EXPIRES: process.env.JWT_EXPIRES,
   OAUTH2_REDIRECT: process.env.OAUTH2_REDIRECT,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
