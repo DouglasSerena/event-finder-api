@@ -39,6 +39,17 @@ export class EventService {
     return data;
   }
 
+  public async getByLocation(latitude: number, longitude: number) {
+    return await this.eventModel
+      .find({
+        $and: [
+          { longitude: { $gte: longitude - 0.2, $lt: longitude + 0.2 } },
+          { latitude: { $gte: latitude - 0.2, $lt: latitude + 0.2 } },
+        ],
+      })
+      .exec();
+  }
+
   public async create(event: IEvent) {
     const category = await this.categoryService.getById(event.categoriesId[0]);
     const tags = await this.filterTags(event);
@@ -113,8 +124,8 @@ export class EventService {
       return {
         icon: 'place',
         name: location.place_name,
-        latitude: location.center[0],
-        longitude: location.center[1],
+        longitude: location.center[0],
+        latitude: location.center[1],
       };
     });
   }

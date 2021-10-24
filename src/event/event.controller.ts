@@ -63,6 +63,23 @@ export class EventController {
     }
   }
 
+  @Get('location/:latitude/:longitude') public async getByLocation(
+    @Param('latitude') latitude: string,
+    @Param('longitude') longitude: string,
+  ) {
+    const [data, error] = await handleTry(
+      this.eventService.getByLocation(
+        Number.parseFloat(latitude),
+        Number.parseFloat(longitude),
+      ),
+    );
+    if (data) {
+      return { data: data };
+    } else {
+      return new BadRequestException(error);
+    }
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Post()
   public async create(
