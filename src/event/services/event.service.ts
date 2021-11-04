@@ -1,13 +1,10 @@
-/*
-https://docs.nestjs.com/providers#services
-*/
-
 import { HttpService, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CategoryService } from 'src/category/services/category.service';
 import { handleTry } from 'src/utils/handle-try';
 import { simplify } from 'src/utils/simplify';
+import { LocationDto } from '../dto/location.dto';
 import { SearchDto } from '../dto/search.dto';
 import { IEvent } from '../interface/event.interface';
 import { Event, EventDocument } from '../schemas/event.schema';
@@ -39,8 +36,12 @@ export class EventService {
     return data;
   }
 
-  public async getByLocation(latitude: number, longitude: number) {
-    return await this.eventModel
+  public async getByLocation(location: LocationDto) {
+    const latitude = Number.parseFloat(location.latitude);
+    const longitude = Number.parseFloat(location.longitude);
+    const categoriesId = location.categoriesId.split(',').filter((id) => id);
+
+    let events: any = await this.eventModel
       .find({
         $and: [
           { longitude: { $gte: longitude - 0.2, $lt: longitude + 0.2 } },
@@ -48,6 +49,40 @@ export class EventService {
         ],
       })
       .exec();
+
+    if (categoriesId.length > 0) {
+      events = this.filterCategories(events, categoriesId);
+    }
+
+    return events;
+  }
+
+  public async search(search: SearchDto) {
+    const query = search.query;
+    const tags = simplify(query);
+    const categoriesId = search.categoriesId.split(',').filter((id) => id);
+
+    let events: any = await this.eventModel.find(
+      {
+        $or: [
+          { tags: { $all: tags } },
+          { name: new RegExp(`.*${query}.*`, 'gi') },
+        ],
+      },
+      null,
+      { limit: search?.limit || 5 },
+    );
+
+    if (categoriesId.length > 0) {
+      events = this.filterCategories(events, categoriesId);
+    }
+
+    const [data] = await handleTry(
+      this.searchLocation(query, {
+        limit: search.limit || 5,
+      }),
+    );
+    return [...events, ...data];
   }
 
   public async create(event: IEvent) {
@@ -79,27 +114,6 @@ export class EventService {
     return await this.eventModel.deleteOne({ _id, userId });
   }
 
-  public async search(search: SearchDto) {
-    const query = search.query || search.q;
-    const tags = simplify(query);
-    const events = await this.eventModel.find(
-      {
-        $or: [
-          { tags: { $all: tags } },
-          { name: new RegExp(`.*${query}.*`, 'gi') },
-        ],
-      },
-      null,
-      { limit: search?.limit || 5 },
-    );
-    const [data] = await handleTry(
-      this.searchLocation(query, {
-        limit: search.limit || 5,
-      }),
-    );
-    return [...events, ...data];
-  }
-
   public async searchLocation(
     value: string,
     options?: { limit?: number; language?: string },
@@ -127,6 +141,17 @@ export class EventService {
         longitude: location.center[0],
         latitude: location.center[1],
       };
+    });
+  }
+
+  private filterCategories(events: IEvent[], categoriesId: string[]) {
+    return events.filter((event) => {
+      for (const categoryId of categoriesId) {
+        if (!event.categoriesId.includes(categoryId)) {
+          return false;
+        }
+      }
+      return true;
     });
   }
 

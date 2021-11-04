@@ -16,6 +16,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { handleTry } from 'src/utils/handle-try';
 import { CreateEventDto } from './dto/create-event.dto';
+import { LocationDto } from './dto/location.dto';
 import { SearchDto } from './dto/search.dto';
 import { EventService } from './services/event.service';
 
@@ -32,8 +33,21 @@ export class EventController {
     }
   }
 
-  @Get('search') public async search(@Query() search: SearchDto) {
-    const [data, error] = await handleTry(this.eventService.search(search));
+  @Get('search') public async search(@Query() searchDto: SearchDto) {
+    const [data, error] = await handleTry(this.eventService.search(searchDto));
+    if (data) {
+      return { data: data };
+    } else {
+      return new BadRequestException(error);
+    }
+  }
+
+  @Get('location') public async getByLocation(
+    @Query() locationDto: LocationDto,
+  ) {
+    const [data, error] = await handleTry(
+      this.eventService.getByLocation(locationDto),
+    );
     if (data) {
       return { data: data };
     } else {
@@ -55,23 +69,6 @@ export class EventController {
   public async getByIdUser(@Param('userId') userId: string) {
     const [data, error] = await handleTry(
       this.eventService.getByIdUser(userId),
-    );
-    if (data) {
-      return { data: data };
-    } else {
-      return new BadRequestException(error);
-    }
-  }
-
-  @Get('location/:latitude/:longitude') public async getByLocation(
-    @Param('latitude') latitude: string,
-    @Param('longitude') longitude: string,
-  ) {
-    const [data, error] = await handleTry(
-      this.eventService.getByLocation(
-        Number.parseFloat(latitude),
-        Number.parseFloat(longitude),
-      ),
     );
     if (data) {
       return { data: data };
